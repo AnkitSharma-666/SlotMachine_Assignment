@@ -69,6 +69,8 @@ git clone https://github.com/AnkitSharma-666/SlotMachine_Assignment
 2. Open the project in Unity (tested on Unity 2021+).
 3. Press Play in the Editor.
 
+---
+
 ## Credits
-Developed By Ankit Sharma
-Audio Sources : mixkit.co | pixabay.com
+Developed By Ankit Sharma.
+Audio Sources : [Mixkit](mixkit.co) | [Pixabay](pixabay.com)
