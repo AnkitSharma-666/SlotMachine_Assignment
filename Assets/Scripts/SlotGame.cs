@@ -12,6 +12,7 @@ public class SlotGame : MonoBehaviour
     public int MinRollCycles = 10;     // Minimum spins per reel
     public int MaxRollCycles = 30;     // Maximum spins per reel
     public float SpinSpeed = 0.1f;
+    public float NextTurnDelay = 3f;
 
     [Header("Reel References")]
     public SpriteRenderer LeftRow;
@@ -75,6 +76,8 @@ public class SlotGame : MonoBehaviour
     // until roll cycles reach zero.
     IEnumerator SpinSlots()
     {
+        AudioManager.Instance.RollingSlotsAudioStart();
+
         UIManager.Instance.SetStatusText("Spinning...");
         while (_leftRollCycle > 0 || _midRollCycle > 0 || _rightRollCycle > 0)
         {
@@ -105,6 +108,8 @@ public class SlotGame : MonoBehaviour
         MidRow.sprite = ResultSprites[_midIndex];
         RightRow.sprite = ResultSprites[_rightIndex];
 
+        AudioManager.Instance.RollingSlotAudioStop(); // stop audio when rolling stop.
+
         CalculateResult();
     }
 
@@ -116,9 +121,9 @@ public class SlotGame : MonoBehaviour
         if (LeftRow.sprite == MidRow.sprite && MidRow.sprite == RightRow.sprite)
         {
             AddPoints(TripleMatchPoints);
-            Debug.Log("You won! Points earned: " + TripleMatchPoints);
             UIManager.Instance.ShowWinningText(true, LeftRow.sprite.name);
-            OnFinishRolling();
+            AudioManager.Instance.JackpotAudioTrigger();
+            StartCoroutine(OnFinishRolling());
             return;
         }
 
@@ -138,23 +143,24 @@ public class SlotGame : MonoBehaviour
 
             AddPoints(reward);
             UIManager.Instance.ShowWinningText(false, matchedSprite.name);
-            Debug.Log("You won with a pair! " + matchedSprite.name);
+            AudioManager.Instance.PairWinAudioTrigger();
         }
         else
         {
             // No win, Show 0 points
+            AudioManager.Instance.NoPairAudioTrigger();
             UIManager.Instance.ShowCurrentPoints(0, true);
-            UIManager.Instance.ShowWinningText(false, "No match"); // tells ui manager to show no match
-            Debug.Log("No win this time. Try again!");
+            UIManager.Instance.ShowWinningText(false, UIManager.Instance.UIText.NoPairKeyValue); // tells ui manager to show no match
         }
 
-        OnFinishRolling();
+        StartCoroutine(OnFinishRolling());
     }
 
     // Called after reels finish rolling.
     // Resets lever state via LeverPull script.
-    void OnFinishRolling()
+    IEnumerator OnFinishRolling()
     {
+        yield return new WaitForSeconds(NextTurnDelay);
         LeverPull leverPull = GetComponent<LeverPull>();
         leverPull.OnLeverReleased();
     }

@@ -12,14 +12,25 @@ public class LeverPull : MonoBehaviour
     [Header("Lever Button")]
     public Button LeverButton;
 
+    private bool canPressLever; // prevent spamming of spacebar
+
     private void Start()
     {
         OnLeverReleased();
     }
 
+    private void Update()
+    {
+        if (canPressLever && Input.GetKeyDown(KeyCode.Space))
+        {
+            OnLeverPulled();
+        }
+    }
+
     // Pulls the lever: deducts points and starts the spin if the player can afford it.
     public void OnLeverPulled()
     {
+        canPressLever = false;
         if (SlotGame.Instance.TotalPoints >= SlotGame.Instance.MinPointsNeeded)
         {
             SlotGame.Instance.TotalPoints -= SlotGame.Instance.MinPointsNeeded;
@@ -47,5 +58,6 @@ public class LeverPull : MonoBehaviour
         LeverReleaseSprite.enabled = true;
         LeverPullSprite.enabled = false;
         LeverButton.interactable = true;
+        canPressLever = true;
     }
 }

@@ -9,6 +9,10 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI CurrentPointText;
     public TextMeshProUGUI StatusText;
 
+    public float TextClearDelay = 3f;
+    public float JackpotTextClearDelay = 5f;
+    public SO_UIText UIText;
+
     #region Singleton
     public static UIManager Instance { get; private set; }
 
@@ -31,7 +35,7 @@ public class UIManager : MonoBehaviour
             CurrentPointText.text = "";
 
         if (StatusText != null)
-            StatusText.text = "Pull the lever to start!";
+            StatusText.text = UIText.StartTips;
     }
 
     // Updates the total points displayed in the UI.
@@ -55,17 +59,19 @@ public class UIManager : MonoBehaviour
 
         if (isJackpot)
         {
-            StatusText.text = "JACKPOT!\n" + iconName;
+            StatusText.text = UIText.JackpotText + iconName;
+            StartCoroutine(ClearUIAfterDelay(JackpotTextClearDelay));
+            return;
         }
-        else if (iconName == "No match")
+        else if (iconName == UIText.NoPairKeyValue)
         {
-            StatusText.text = "No match found. Try again!";
+            StatusText.text = UIText.NoPairText;
         }
         else
         {
-            StatusText.text = "You won with a pair!\n" + iconName;
+            StatusText.text = UIText.PairText + iconName;
         }
-        StartCoroutine(ClearUIAfterDelay());
+        StartCoroutine(ClearUIAfterDelay(TextClearDelay));
     }
 
     // Sets a custom status text (e.g., at start or after losing).
@@ -76,10 +82,10 @@ public class UIManager : MonoBehaviour
     }
 
     // Clears the winning text after a delay.
-    private IEnumerator ClearUIAfterDelay()
+    private IEnumerator ClearUIAfterDelay(float time)
     {
-        yield return new WaitForSeconds(3f);
-        StatusText.text = "Pull the lever to start!";
+        yield return new WaitForSeconds(time);
+        StatusText.text = UIText.StartTips;
         CurrentPointText.text = "";
     }
 }
