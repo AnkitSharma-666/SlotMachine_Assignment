@@ -1,0 +1,169 @@
+using System.Collections;
+using UnityEngine;
+
+// Handles the slot machine logic: spinning reels, checking results, 
+// adding points, and triggering UI updates through UIManager.
+
+public class SlotGame : MonoBehaviour
+{
+    [Header("Game Settings")]
+    public int TotalPoints = 0;        // Current player points
+    public int MinPointsNeeded = 10;   // Minimum points required to pull lever
+    public int MinRollCycles = 10;     // Minimum spins per reel
+    public int MaxRollCycles = 30;     // Maximum spins per reel
+    public float SpinSpeed = 0.1f;
+
+    [Header("Reel References")]
+    public SpriteRenderer LeftRow;
+    public SpriteRenderer MidRow;
+    public SpriteRenderer RightRow;
+
+    [Header("Symbols")]
+    public Sprite[] ResultSprites;     // Possible reel results
+
+    [Header("Payout Values")]
+    public int TripleMatchPoints;
+    public int PairWithBar;
+    public int PairWithCherry;
+    public int PairWithSeven;
+    public int PairWithBell;
+
+    // Internal roll cycle counters
+    private int _leftRollCycle = 0;
+    private int _midRollCycle = 0;
+    private int _rightRollCycle = 0;
+
+    private int _leftIndex = 0;
+    private int _midIndex = 0;
+    private int _rightIndex = 0;
+
+    #region Singleton
+    public static SlotGame Instance { get; private set; }
+    private void Awake()
+    {
+        if (Instance == null)
+            Instance = this;
+        else
+            Destroy(gameObject);
+    }
+    #endregion
+
+    private void Start()
+    {
+        // Initialize UI
+        UIManager.Instance.UpdateTotalPoints(TotalPoints);
+        UIManager.Instance.SetStatusText("Pull the lever to start!");
+    }
+
+    // Trigger the slot machine spin when the lever is pulled.
+    // Choose the final symbol then Randomizes cycle counts for each reel and starts spinning coroutine.
+    public void SpinSlotsTrigger()
+    {
+        // Pick RNG results up front
+        _leftIndex = Random.Range(0, ResultSprites.Length);
+        _midIndex = Random.Range(0, ResultSprites.Length);
+        _rightIndex = Random.Range(0, ResultSprites.Length);
+
+        _leftRollCycle = Mathf.RoundToInt(Random.Range(MinRollCycles, MaxRollCycles));
+        _midRollCycle = Mathf.RoundToInt(Random.Range(MinRollCycles, MaxRollCycles));
+        _rightRollCycle = Mathf.RoundToInt(Random.Range(MinRollCycles, MaxRollCycles));
+
+        StartCoroutine(SpinSlots());
+    }
+
+    // Coroutine that spins reels by changing their sprites randomly
+    // until roll cycles reach zero.
+    IEnumerator SpinSlots()
+    {
+        UIManager.Instance.SetStatusText("Spinning...");
+        while (_leftRollCycle > 0 || _midRollCycle > 0 || _rightRollCycle > 0)
+        {
+            if (_leftRollCycle > 0)
+            {
+                _leftIndex = (_leftIndex + 1) % ResultSprites.Length; // loops between 0 and length
+                LeftRow.sprite = ResultSprites[_leftIndex];
+                _leftRollCycle--;
+            }
+            if (_midRollCycle > 0)
+            {
+                _midIndex = (_midIndex + 1) % ResultSprites.Length;
+                MidRow.sprite = ResultSprites[_midIndex];
+                _midRollCycle--;
+            }
+            if (_rightRollCycle > 0)
+            {
+                _rightIndex = (_rightIndex + 1) % ResultSprites.Length;
+                RightRow.sprite = ResultSprites[_rightIndex];
+                _rightRollCycle--;
+            }
+
+            yield return new WaitForSeconds(SpinSpeed); // Controls spin speed
+        }
+
+        // Snap to the predetermined random result
+        LeftRow.sprite = ResultSprites[_leftIndex];
+        MidRow.sprite = ResultSprites[_midIndex];
+        RightRow.sprite = ResultSprites[_rightIndex];
+
+        CalculateResult();
+    }
+
+    // Calculates the result after the reels stop spinning.
+    // Handles triple match (jackpot) and pair matches with payouts.
+    void CalculateResult()
+    {
+        // Jackpot: All three match
+        if (LeftRow.sprite == MidRow.sprite && MidRow.sprite == RightRow.sprite)
+        {
+            AddPoints(TripleMatchPoints);
+            Debug.Log("You won! Points earned: " + TripleMatchPoints);
+            UIManager.Instance.ShowWinningText(true, LeftRow.sprite.name);
+            OnFinishRolling();
+            return;
+        }
+
+        // Check for pairs
+        Sprite matchedSprite = null;
+        if (LeftRow.sprite == MidRow.sprite) matchedSprite = LeftRow.sprite;
+        else if (MidRow.sprite == RightRow.sprite) matchedSprite = MidRow.sprite;
+        else if (LeftRow.sprite == RightRow.sprite) matchedSprite = LeftRow.sprite;
+
+        if (matchedSprite != null)
+        {
+            int reward = 0;
+            if (matchedSprite.name.Contains("Bar")) reward = PairWithBar;
+            else if (matchedSprite.name.Contains("Cherry")) reward = PairWithCherry;
+            else if (matchedSprite.name.Contains("Seven")) reward = PairWithSeven;
+            else if (matchedSprite.name.Contains("Bell")) reward = PairWithBell;
+
+            AddPoints(reward);
+            UIManager.Instance.ShowWinningText(false, matchedSprite.name);
+            Debug.Log("You won with a pair! " + matchedSprite.name);
+        }
+        else
+        {
+            // No win, Show 0 points
+            UIManager.Instance.ShowCurrentPoints(0, true);
+            UIManager.Instance.ShowWinningText(false, "No match"); // tells ui manager to show no match
+            Debug.Log("No win this time. Try again!");
+        }
+
+        OnFinishRolling();
+    }
+
+    // Called after reels finish rolling.
+    // Resets lever state via LeverPull script.
+    void OnFinishRolling()
+    {
+        LeverPull leverPull = GetComponent<LeverPull>();
+        leverPull.OnLeverReleased();
+    }
+
+    // Adds points to total and updates UI accordingly.
+    private void AddPoints(int amount)
+    {
+        TotalPoints += amount;
+        UIManager.Instance.UpdateTotalPoints(TotalPoints);
+        UIManager.Instance.ShowCurrentPoints(amount, true);
+    }
+}
