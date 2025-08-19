@@ -26,22 +26,22 @@ Spin the slot machine by pulling the lever and try your luck!
 
 ## 📦 Features
 
-- ✅ Winning logic (Jackpot + Pair Match).  
-- ✅ Sequential reel animations (looping symbols for smooth visuals).  
-- ✅ Randomized outcomes with fair RNG.  
-- ✅ Audio feedback: BGM, spin, jackpot, normal win, no win.  
-- ✅ Audio mute toggle.  
-- ✅ UI updates for total points, status messages, and results.  
-- ✅ Point system with play cost & rewards.  
-- ✅ Delay between lever pulls to prevent spamming.
+- Winning logic (Jackpot + Pair Match).  
+- Sequential reel animations (looping symbols for smooth visuals).  
+- Randomized outcomes with fair RNG.  
+- Audio feedback: BGM, spin, jackpot, normal win, no win.  
+- Audio mute toggle.  
+- UI updates for total points, status messages, and results.  
+- Point system with play cost & rewards.  
+- Delay between lever pulls to prevent spamming.
 
 ---
 
 ## 💡 Bonus Features
 
-- 🎶 Immersive sound effects + background music.  
-- 🔇 Audio mute toggle.  
-- ⏱️ Delay between turns for better pacing and player experience.  
+- Immersive sound effects + background music.  
+- Audio mute toggle.  
+- Delay between turns for better pacing and player experience.  
 
 ---
 
