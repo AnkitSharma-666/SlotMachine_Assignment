@@ -57,14 +57,9 @@ public class SlotGame : MonoBehaviour
     }
 
     // Trigger the slot machine spin when the lever is pulled.
-    // Choose the final symbol then Randomizes cycle counts for each reel and starts spinning coroutine.
+    // Randomizes cycle counts for each reel and starts spinning coroutine.
     public void SpinSlotsTrigger()
     {
-        // Pick RNG results up front
-        _leftIndex = Random.Range(0, ResultSprites.Length);
-        _midIndex = Random.Range(0, ResultSprites.Length);
-        _rightIndex = Random.Range(0, ResultSprites.Length);
-
         _leftRollCycle = Mathf.RoundToInt(Random.Range(MinRollCycles, MaxRollCycles));
         _midRollCycle = Mathf.RoundToInt(Random.Range(MinRollCycles, MaxRollCycles));
         _rightRollCycle = Mathf.RoundToInt(Random.Range(MinRollCycles, MaxRollCycles));
@@ -104,12 +99,17 @@ public class SlotGame : MonoBehaviour
                 yield return new WaitForSeconds(SpinSpeed);
         }
 
+<<<<<<< HEAD
         // Snap to your predetermined results
         LeftRow.sprite = ResultSprites[_leftIndex];
         MidRow.sprite = ResultSprites[_midIndex];
         RightRow.sprite = ResultSprites[_rightIndex];
 
         AudioManager.Instance.RollingSlotAudioStop();
+=======
+        AudioManager.Instance.RollingSlotAudioStop(); // stop audio when rolling stop.
+
+>>>>>>> 52ed2fe (Slot Machine code Bug Fix)
         CalculateResult();
     }
 
