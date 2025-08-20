@@ -77,39 +77,39 @@ public class SlotGame : MonoBehaviour
     IEnumerator SpinSlots()
     {
         AudioManager.Instance.RollingSlotsAudioStart();
-
         UIManager.Instance.SetStatusText("Spinning...");
+
+        int tempLeft = 0, tempMid = 0, tempRight = 0;
+
         while (_leftRollCycle > 0 || _midRollCycle > 0 || _rightRollCycle > 0)
         {
             if (_leftRollCycle > 0)
             {
-                _leftIndex = (_leftIndex + 1) % ResultSprites.Length; // loops between 0 and length
-                LeftRow.sprite = ResultSprites[_leftIndex];
+                tempLeft = (tempLeft + 1) % ResultSprites.Length;
+                LeftRow.sprite = ResultSprites[tempLeft];
                 _leftRollCycle--;
             }
             if (_midRollCycle > 0)
             {
-                _midIndex = (_midIndex + 1) % ResultSprites.Length;
-                MidRow.sprite = ResultSprites[_midIndex];
+                tempMid = (tempMid + 1) % ResultSprites.Length;
+                MidRow.sprite = ResultSprites[tempMid];
                 _midRollCycle--;
             }
             if (_rightRollCycle > 0)
             {
-                _rightIndex = (_rightIndex + 1) % ResultSprites.Length;
-                RightRow.sprite = ResultSprites[_rightIndex];
+                tempRight = (tempRight + 1) % ResultSprites.Length;
+                RightRow.sprite = ResultSprites[tempRight];
                 _rightRollCycle--;
             }
-
-            yield return new WaitForSeconds(SpinSpeed); // Controls spin speed
+                yield return new WaitForSeconds(SpinSpeed);
         }
 
-        // Snap to the predetermined random result
+        // Snap to your predetermined results
         LeftRow.sprite = ResultSprites[_leftIndex];
         MidRow.sprite = ResultSprites[_midIndex];
         RightRow.sprite = ResultSprites[_rightIndex];
 
-        AudioManager.Instance.RollingSlotAudioStop(); // stop audio when rolling stop.
-
+        AudioManager.Instance.RollingSlotAudioStop();
         CalculateResult();
     }
 
